@@ -1,25 +1,21 @@
-var http = require('http');
+var bodyParser = require('body-parser');
 var express = require('express');
-var app = express()
+var cors = require('cors');
+var app = express();
 
+app.use(cors());
+app.use(bodyParser.json());
 
+var port = 1235;
+
+app.listen(port, function () {
+  console.log("alive: " + port);
+});
 
 app.get('/',function(req,res){
 	res.send('hellooooo')
 })
 
-app.post('/', function (req, res) {
-  res.send('POST request to the homepage')
+app.post('/create_proposal', function (req, res) {
+    
 })
-
-app.get('/bla', function(req, rest){
-	res.send('blablabla')
-})
-
-app.listen(1235);
-
-var server = http.createServer(function(req, res) {
-res.writeHead(200);
-res.end('Hi everybody!');
-});
-server.listen(1234);
