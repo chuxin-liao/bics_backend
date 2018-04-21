@@ -1,5 +1,5 @@
 ## Preview
-This is the backend of IS4302 project - Blockchain Integrated Claims Systems.
+This is the Node.js backend of IS4302 project - Blockchain Integrated Claims Systems.
 
 ## Quick Start
 1. Clone the repo git clone https://github.com/chuxin-liao/bics_backend.git
