@@ -77,6 +77,31 @@ app.post('/create_tokens', function (req, res) {
 	});
 });
 
+app.post('/get_balance', function (req, res) {
+	var url;
+	console.log(req.body);
+	emailtoID_2(req.body.email, req.body.role, '', res, callback);
+	function callback(list, id, res) {
+		if (req.body.role == 'Vendor'){
+			url = "http://localhost:3000/api/org.acme.biccoins.Vendor/" + id;
+		}else{
+			url = "http://localhost:3000/api/org.acme.biccoins.GoverningBody/1";
+		}
+		request({
+			url: url,
+			method: "GET",
+			headers: {"Content-Type": "application/json"}
+		}, function(err, response, body) {
+			if (err) {
+				console.log("Error retrieving balance: " + err);
+				res.sendStatus(400);
+			} else {
+				console.log("Successfully retrieved balance: " + JSON.parse(body).biccoinBalance);
+				res.status(200).send({'balance': JSON.parse(body).biccoinBalance});
+			}
+		});
+	}
+});
 
 app.post("/retrieve_proposals", (req, res) => {
 	request({
@@ -141,29 +166,47 @@ app.post('/cashout', function (req, res) {
 })
 
 app.post('/register', function (req, res) {
-	var proposal = {
-  		"$class": "org.acme.biccoins.Submitter",
- 		"studentId": req.body.id,
-  		"name": req.body.first_name + req.body.last_name,
-  		"representingBody": req.body.department,
- 		"matricNumber": req.body.matric,
-  		"email": req.body.email		 
-	};
-	console.log(proposal);
-	request({
-		url: "http://localhost:3000/api/org.acme.biccoins.Submitter",
-		method: "POST",
-		headers: {"Content-Type": "application/json"},
-		body: JSON.stringify(proposal)
-	}, function(err, response, body) {
-		if (err) {
-			console.log("Error registering" + err);
-			res.sendStatus(400);
-		} else {
-			console.log("Successfully registered");
-			res.sendStatus(200);
-		}
-	});
+	function getNewID(callback) {
+		request({
+			url: "http://localhost:3000/api/org.acme.biccoins.Submitter",
+			method: "GET",
+			headers: {"Content-Type": "application/json"}
+		}, function(err, response, body) {
+			if (err) {
+				console.log("Error getting student list" + err);
+				res.sendStatus(400);
+			} else {
+				console.log("Successfully retrieve student list");
+				var id = JSON.parse(body).length;
+				callback(id + 1);
+			}
+		});
+	}
+	function registerNewID(id) {
+		var proposal = {
+	  		"$class": "org.acme.biccoins.Submitter",
+	 		"studentId": id,
+	  		"name": req.body.first_name + " " + req.body.last_name,
+	  		"representingBody": req.body.department,
+	 		"matricNumber": req.body.matric,
+	  		"email": req.body.email		 
+		};
+		request({
+			url: "http://localhost:3000/api/org.acme.biccoins.Submitter",
+			method: "POST",
+			headers: {"Content-Type": "application/json"},
+			body: JSON.stringify(proposal)
+		}, function(err, response, body) {
+			if (err) {
+				console.log("Error registering" + err);
+				res.sendStatus(400);
+			} else {
+				console.log("Successfully registered");
+				res.sendStatus(200);
+			}
+		});
+	}
+	getNewID(registerNewID);
 })
 
 app.post("/approve", (req, res) => {
